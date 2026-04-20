@@ -1,0 +1,9 @@
+{
+  "name": "auras-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Auras — WhatsApp AI for SA small business. Static landing + Vercel serverless chat proxy.",
+  "engines": {
+    "node": ">=18"
+  }
+}
