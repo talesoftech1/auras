@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Auras — Your business, available 24/7 on WhatsApp</title>
+<meta name="description" content="Auras builds a custom AI assistant for your business that answers customer questions on WhatsApp, 24/7. R299/month. Setup in 24 hours." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --ink: #0a0a0a;
+    --ink-soft: #3a3a3a;
+    --muted: #6b6b6b;
+    --line: #ececec;
+    --panel: #fafafa;
+    --accent: #00b87a;      /* emerald — subtle WhatsApp nod */
+    --accent-deep: #009966;
+    --whatsapp: #25d366;
+    --radius: 16px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 10px 40px rgba(0,0,0,0.06);
+    --shadow-lg: 0 20px 60px rgba(0,0,0,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  img, svg { display: block; max-width: 100%; }
+
+  a { color: inherit; text-decoration: none; }
+
+  .container {
+    width: 100%;
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* ----- Nav ----- */
+  nav {
+    position: sticky;
+    top: 0;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: saturate(180%) blur(18px);
+    -webkit-backdrop-filter: saturate(180%) blur(18px);
+    border-bottom: 1px solid var(--line);
+    z-index: 50;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: -0.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .logo-dot {
+    width: 10px;
+    height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(0,184,122,0.15);
+  }
+  .nav-links { display: none; gap: 28px; font-size: 15px; color: var(--ink-soft); }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--ink);
+    color: #fff;
+    padding: 9px 16px;
+    border-radius: 999px;
+    transition: transform .15s ease, background .15s ease;
+  }
+  .nav-cta:hover { background: var(--accent-deep); transform: translateY(-1px); }
+
+  @media (min-width: 768px) { .nav-links { display: flex; } }
+
+  /* ----- Hero ----- */
+  .hero {
+    padding: 72px 0 56px;
+    position: relative;
+    overflow: hidden;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -200px; right: -160px;
+    width: 520px; height: 520px;
+    background: radial-gradient(circle, rgba(0,184,122,0.12), transparent 60%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 48px;
+    align-items: center;
+  }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-deep);
+    background: rgba(0,184,122,0.08);
+    padding: 6px 12px;
+    border-radius: 999px;
+    margin-bottom: 20px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,184,122,0.2);
+  }
+  h1 {
+    font-size: clamp(38px, 6vw, 64px);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+    line-height: 1.05;
+    margin-bottom: 20px;
+  }
+  h1 .accent { color: var(--accent-deep); }
+  .lede {
+    font-size: clamp(17px, 2vw, 19px);
+    color: var(--ink-soft);
+    max-width: 560px;
+    margin-bottom: 32px;
+  }
+  .cta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    background: var(--ink);
+    color: #fff;
+    padding: 16px 28px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    transition: transform .15s ease, background .15s ease, box-shadow .15s ease;
+  }
+  .btn-primary:hover {
+    background: var(--accent-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(0,184,122,0.25);
+  }
+  .btn-primary svg { width: 18px; height: 18px; }
+  .fineprint {
+    font-size: 14px;
+    color: var(--muted);
+  }
+
+  /* ----- Phone mockup ----- */
+  .phone-wrap {
+    display: flex;
+    justify-content: center;
+    position: relative;
+  }
+  .phone {
+    width: 300px;
+    background: #1a1a1a;
+    border-radius: 44px;
+    padding: 10px;
+    box-shadow: var(--shadow-lg), 0 0 0 2px #2a2a2a inset;
+    position: relative;
+  }
+  .phone::before {
+    content: "";
+    position: absolute;
+    top: 16px; left: 50%;
+    transform: translateX(-50%);
+    width: 100px; height: 22px;
+    background: #000;
+    border-radius: 12px;
+    z-index: 2;
+  }
+  .phone-screen {
+    background: #e5ddd5;
+    border-radius: 36px;
+    overflow: hidden;
+    height: 580px;
+    display: flex;
+    flex-direction: column;
+  }
+  .wa-header {
+    background: #075e54;
+    color: #fff;
+    padding: 48px 16px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .wa-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: #fff;
+    font-size: 15px;
+  }
+  .wa-name { font-weight: 600; font-size: 15px; }
+  .wa-status { font-size: 12px; opacity: 0.85; }
+  .wa-body {
+    flex: 1;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,0.4) 1px, transparent 1px),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,0.3) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .bubble {
+    max-width: 78%;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    line-height: 1.35;
+    box-shadow: 0 1px 0.5px rgba(0,0,0,0.08);
+    position: relative;
+  }
+  .bubble.in { background: #fff; align-self: flex-start; border-top-left-radius: 2px; }
+  .bubble.out { background: #dcf8c6; align-self: flex-end; border-top-right-radius: 2px; }
+  .bubble .time {
+    display: block;
+    font-size: 10px;
+    color: #8a8a8a;
+    margin-top: 4px;
+    text-align: right;
+  }
+  .wa-input {
+    padding: 8px 10px;
+    background: #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .wa-input .field {
+    flex: 1;
+    background: #fff;
+    border-radius: 999px;
+    padding: 8px 14px;
+    font-size: 13px;
+    color: #9a9a9a;
+  }
+  .wa-send {
+    width: 36px; height: 36px;
+    background: var(--whatsapp);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .wa-send svg { width: 16px; height: 16px; fill: #fff; }
+
+  @media (min-width: 900px) {
+    .hero-grid { grid-template-columns: 1.1fr 1fr; }
+  }
+
+  /* ----- Section base ----- */
+  section {
+    padding: 80px 0;
+  }
+  .section-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent-deep);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-bottom: 12px;
+  }
+  h2 {
+    font-size: clamp(30px, 4vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    max-width: 700px;
+    margin-bottom: 16px;
+  }
+  .section-lede {
+    font-size: 17px;
+    color: var(--ink-soft);
+    max-width: 600px;
+    margin-bottom: 56px;
+  }
+
+  /* ----- How it works ----- */
+  .how {
+    background: var(--panel);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .steps {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .step {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 32px 28px;
+    position: relative;
+    transition: transform .2s ease, box-shadow .2s ease;
+  }
+  .step:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+  .step-num {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    width: 32px; height: 32px;
+    background: var(--ink);
+    color: #fff;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .step h3 {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+    margin-bottom: 8px;
+  }
+  .step p { color: var(--muted); font-size: 15px; }
+
+  @media (min-width: 800px) {
+    .steps { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  }
+
+  /* ----- Features ----- */
+  .features-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .feature {
+    padding: 28px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .feature:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .feature-icon {
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    background: rgba(0,184,122,0.1);
+    color: var(--accent-deep);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 18px;
+  }
+  .feature-icon svg { width: 22px; height: 22px; }
+  .feature h3 {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+  .feature p { color: var(--muted); font-size: 15px; }
+
+  @media (min-width: 640px) { .features-grid { grid-template-columns: 1fr 1fr; } }
+  @media (min-width: 960px) { .features-grid { grid-template-columns: repeat(3, 1fr); } }
+
+  /* ----- Mid CTA banner ----- */
+  .midcta {
+    background: var(--ink);
+    color: #fff;
+    border-radius: 24px;
+    padding: 48px 32px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .midcta::before {
+    content: "";
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(0,184,122,0.5), transparent 70%);
+  }
+  .midcta h2 { color: #fff; margin: 0 auto 24px; }
+  .midcta .btn-primary { background: var(--accent); }
+  .midcta .btn-primary:hover { background: #fff; color: var(--ink); }
+
+  /* ----- Testimonials ----- */
+  .testimonials { background: var(--panel); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .t-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .tcard {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .stars { color: var(--accent); font-size: 14px; letter-spacing: 2px; }
+  .tquote { font-size: 16px; line-height: 1.55; color: var(--ink-soft); flex: 1; }
+  .tperson { display: flex; align-items: center; gap: 12px; }
+  .tavatar {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-deep));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .tname { font-weight: 600; font-size: 15px; }
+  .tbusiness { font-size: 13px; color: var(--muted); }
+
+  @media (min-width: 800px) { .t-grid { grid-template-columns: repeat(3, 1fr); } }
+
+  /* ----- Pricing ----- */
+  .price-card {
+    max-width: 480px;
+    margin: 0 auto;
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 40px 36px;
+    text-align: center;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+  }
+  .price-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--whatsapp));
+  }
+  .plan-name {
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent-deep);
+    margin-bottom: 12px;
+  }
+  .price {
+    font-size: 56px;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .price-unit { color: var(--muted); font-size: 16px; font-weight: 500; }
+  .price-list {
+    list-style: none;
+    text-align: left;
+    margin: 32px 0;
+    padding: 24px 0;
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .price-list li {
+    padding: 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    color: var(--ink-soft);
+  }
+  .price-list li::before {
+    content: "";
+    flex-shrink: 0;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: rgba(0,184,122,0.15) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23009966' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><polyline points='20 6 9 17 4 12'/></svg>") center / 10px no-repeat;
+  }
+  .price-fineprint { color: var(--muted); font-size: 13px; margin-top: 16px; }
+
+  /* ----- FAQ ----- */
+  .faq-list { max-width: 760px; margin: 0 auto; }
+  details {
+    border-bottom: 1px solid var(--line);
+    padding: 20px 0;
+  }
+  details[open] summary .chev { transform: rotate(45deg); }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    font-weight: 600;
+    font-size: 17px;
+    letter-spacing: -0.01em;
+  }
+  summary::-webkit-details-marker { display: none; }
+  .chev {
+    flex-shrink: 0;
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    background: var(--panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 400;
+    color: var(--ink-soft);
+    transition: transform .2s ease;
+  }
+  details p {
+    margin-top: 12px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  /* ----- Footer ----- */
+  footer {
+    padding: 56px 0 40px;
+    border-top: 1px solid var(--line);
+    background: #fafafa;
+  }
+  .footer-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .footer-links { display: flex; gap: 20px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+  .footer-links a:hover { color: var(--ink); }
+  .footer-meta { font-size: 13px; color: var(--muted); }
+
+  @media (min-width: 700px) {
+    .footer-inner { flex-direction: row; justify-content: space-between; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="container nav-inner">
+    <a href="#" class="logo"><span class="logo-dot"></span>Auras</a>
+    <div class="nav-links">
+      <a href="#how">How it works</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a href="#pricing" class="nav-cta">Get started</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow">Built for small businesses in South Africa</div>
+      <h1>Your business. <br/><span class="accent">Available 24/7</span> on WhatsApp.</h1>
+      <p class="lede">Auras builds a custom AI assistant for your business that answers customer questions, handles enquiries, and never takes a day off — for R299/month.</p>
+      <div class="cta-row">
+        <a href="#pricing" class="btn-primary">
+          Get My AI Assistant
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+      <p class="fineprint">Setup in 24 hours. No tech skills needed.</p>
+    </div>
+
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="wa-header">
+            <div class="wa-avatar">A</div>
+            <div>
+              <div class="wa-name">Your Business · Auras</div>
+              <div class="wa-status">● online</div>
+            </div>
+          </div>
+          <div class="wa-body">
+            <div class="bubble in">Hi! Do you have availability for a haircut tomorrow? <span class="time">09:14</span></div>
+            <div class="bubble out">Hi Nomsa 👋 Yes — I've got 10:30 or 14:00 open tomorrow. Which works?<span class="time">09:14</span></div>
+            <div class="bubble in">10:30 please. How much is a cut and wash?<span class="time">09:15</span></div>
+            <div class="bubble out">Cut + wash is R250. I've tentatively booked you for 10:30 — want me to confirm?<span class="time">09:15</span></div>
+            <div class="bubble in">Yes please!<span class="time">09:16</span></div>
+            <div class="bubble out">Confirmed ✅ See you at 10:30 tomorrow. Reply anytime if you need to reschedule.<span class="time">09:16</span></div>
+          </div>
+          <div class="wa-input">
+            <div class="field">Type a message…</div>
+            <div class="wa-send"><svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- HOW IT WORKS -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="section-label">How it works</div>
+    <h2>Live on WhatsApp in 3 steps.</h2>
+    <p class="section-lede">You send us a few things. We do the heavy lifting. Your customers get instant answers.</p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>We scan your website and upload your docs</h3>
+        <p>Menus, pricing, policies, FAQs — whatever you've got. Your assistant learns from it all.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>Your AI assistant goes live on WhatsApp</h3>
+        <p>We connect it to a WhatsApp number for your business. No app for customers to download.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Customers text in and get instant, accurate answers</h3>
+        <p>Questions, bookings, enquiries — all handled in the place your customers already are.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2>Everything a small business needs. Nothing it doesn't.</h2>
+    <p class="section-lede">No bloated dashboards. No complex setup. Just a capable assistant doing real work.</p>
+
+    <div class="features-grid">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2H3a1 1 0 00-1 1v14a1 1 0 001 1h4v4l5-4h9a1 1 0 001-1V3a1 1 0 00-1-1z"/></svg>
+        </div>
+        <h3>Trained on YOUR business</h3>
+        <p>Website, documents, pricing — your assistant only speaks about what you do.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 2 13 11 20 11"/><path d="M13 11l8.5 8.5"/><circle cx="8" cy="16" r="6"/></svg>
+        </div>
+        <h3>Instant WhatsApp replies</h3>
+        <p>Customers get answers in seconds, not hours. No more missed messages.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </div>
+        <h3>Booking built in</h3>
+        <p>Customers book appointments directly in the chat. Synced to your calendar.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Available 24/7</h3>
+        <p>Replies at 2am, on weekends, over public holidays. Never takes a day off.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15A9 9 0 1 1 18 6.36L23 10"/></svg>
+        </div>
+        <h3>Live in 24 hours</h3>
+        <p>Send us what you've got and we'll have your assistant live by tomorrow.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg>
+        </div>
+        <h3>Cancel anytime</h3>
+        <p>No contracts. No lock-in. Keep it as long as it's earning its keep.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MID CTA -->
+<section style="padding: 20px 0 80px;">
+  <div class="container">
+    <div class="midcta">
+      <h2>Ready to stop missing messages?</h2>
+      <a href="#pricing" class="btn-primary">
+        Get My AI Assistant
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials">
+  <div class="container">
+    <div class="section-label">Loved by local business owners</div>
+    <h2>Real businesses. Real results.</h2>
+    <p class="section-lede">Small business owners across South Africa are letting Auras handle the messages they used to miss.</p>
+
+    <div class="t-grid">
+      <div class="tcard">
+        <div class="stars">★★★★★</div>
+        <p class="tquote">"I was losing bookings because I couldn't always get to WhatsApp. Now my salon books appointments while I'm cutting hair. Game changer."</p>
+        <div class="tperson">
+          <div class="tavatar">L</div>
+          <div>
+            <div class="tname">Lerato M.</div>
+            <div class="tbusiness">The Cut Lab · Johannesburg</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard">
+        <div class="stars">★★★★★</div>
+        <p class="tquote">"People WhatsApp me at all hours asking about pricing. Auras handles it and sends me the ones ready to book. Worth every cent."</p>
+        <div class="tperson">
+          <div class="tavatar">J</div>
+          <div>
+            <div class="tname">Jaco van der Merwe</div>
+            <div class="tbusiness">JVM Plumbing · Cape Town</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard">
+        <div class="stars">★★★★★</div>
+        <p class="tquote">"Setup was honestly less than a day. It knows our menu, our specials, everything. Customers think they're chatting to a real person."</p>
+        <div class="tperson">
+          <div class="tavatar">T</div>
+          <div>
+            <div class="tname">Thandi N.</div>
+            <div class="tbusiness">Umami Kitchen · Durban</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section id="pricing">
+  <div class="container">
+    <div style="text-align:center; margin-bottom: 48px;">
+      <div class="section-label">Pricing</div>
+      <h2 style="margin: 0 auto 16px;">One simple plan. No surprises.</h2>
+      <p class="section-lede" style="margin: 0 auto;">Everything included. Month to month.</p>
+    </div>
+
+    <div class="price-card">
+      <div class="plan-name">Auras · Standard</div>
+      <div>
+        <span class="price">R299</span>
+        <span class="price-unit">/month</span>
+      </div>
+      <ul class="price-list">
+        <li>Custom AI trained on your business</li>
+        <li>WhatsApp integration</li>
+        <li>Calendar booking</li>
+        <li>Unlimited conversations</li>
+        <li>24/7 availability</li>
+      </ul>
+      <a href="#" class="btn-primary" style="width: 100%; justify-content: center;">
+        Get My AI Assistant
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </a>
+      <p class="price-fineprint">No setup fee. Cancel anytime.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq" style="background: var(--panel); border-top: 1px solid var(--line);">
+  <div class="container">
+    <div style="text-align:center; margin-bottom: 48px;">
+      <div class="section-label">FAQ</div>
+      <h2 style="margin: 0 auto;">Questions, answered.</h2>
+    </div>
+
+    <div class="faq-list">
+      <details>
+        <summary>Do I need to be technical? <span class="chev">+</span></summary>
+        <p>No — we handle everything. You just send us your info and we take care of the rest.</p>
+      </details>
+      <details>
+        <summary>What does it get trained on? <span class="chev">+</span></summary>
+        <p>Your website, any documents you upload, and your calendar. The more you share, the sharper it gets.</p>
+      </details>
+      <details>
+        <summary>How long does setup take? <span class="chev">+</span></summary>
+        <p>24 hours or less. Most businesses are live the next morning.</p>
+      </details>
+      <details>
+        <summary>Can it book appointments? <span class="chev">+</span></summary>
+        <p>Yes — it connects to your calendar so customers can book directly in WhatsApp. No back-and-forth.</p>
+      </details>
+      <details>
+        <summary>What if I want to change something? <span class="chev">+</span></summary>
+        <p>Just send us updated info and we'll retrain it. New prices, new services, new hours — no problem.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container footer-inner">
+    <div>
+      <a href="#" class="logo"><span class="logo-dot"></span>Auras</a>
+      <div class="footer-meta" style="margin-top: 8px;">Built in Cape Town 🇿🇦</div>
+    </div>
+    <div class="footer-links">
+      <a href="mailto:hello@auras.co.za">hello@auras.co.za</a>
+      <a href="#">Instagram</a>
+      <a href="#faq">FAQ</a>
+      <a href="#pricing">Pricing</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
