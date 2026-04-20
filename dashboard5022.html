@@ -4,289 +4,986 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Auras Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f9f9f8; color: #1a1a1a; padding: 24px; }
-  input, select, button { font-family: inherit; }
-  input { width: 100%; padding: 8px 12px; font-size: 13px; border: 0.5px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a1a; outline: none; }
-  input:focus { box-shadow: 0 0 0 2px #378ADD44; border-color: #378ADD; }
-  button { cursor: pointer; background: transparent; border: 0.5px solid #ccc; border-radius: 8px; padding: 6px 14px; font-size: 12px; color: #1a1a1a; }
-  button:hover { background: #f0f0ee; }
-  select { padding: 6px 10px; font-size: 12px; border: 0.5px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a1a; cursor: pointer; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f9f9f8;
+    --surface: #ffffff;
+    --surface2: #f4f4f2;
+    --surface3: #eeecea;
+    --border: rgba(0,0,0,0.1);
+    --border2: rgba(0,0,0,0.18);
+    --text: #1a1a1a;
+    --text2: #5a5a5a;
+    --text3: #999;
+    --purple: #7F77DD; --purple-light: #EEEDFE; --purple-dark: #3C3489;
+    --teal: #1D9E75; --teal-light: #E1F5EE; --teal-dark: #085041;
+    --blue: #378ADD; --blue-light: #E6F1FB; --blue-dark: #0C447C;
+    --amber: #BA7517; --amber-light: #FAEEDA; --amber-dark: #633806;
+    --green: #639922; --green-light: #EAF3DE; --green-dark: #27500A;
+    --coral: #D85A30; --coral-light: #FAECE7; --coral-dark: #712B13;
+    --red: #E24B4A; --red-light: #FCEBEB; --red-dark: #791F1F;
+    --gray: #888780; --gray-light: #F1EFE8; --gray-dark: #444441;
+    --radius-sm: 6px; --radius-md: 8px; --radius-lg: 12px; --radius-xl: 16px;
+    --shadow: none;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1a; --surface: #252523; --surface2: #2e2e2b; --surface3: #363633;
+      --border: rgba(255,255,255,0.09); --border2: rgba(255,255,255,0.16);
+      --text: #f0f0ed; --text2: #b0b0aa; --text3: #666;
+      --purple-light: #26215C; --purple-dark: #CECBF6;
+      --teal-light: #04342C; --teal-dark: #9FE1CB;
+      --blue-light: #042C53; --blue-dark: #B5D4F4;
+      --amber-light: #412402; --amber-dark: #FAC775;
+      --green-light: #173404; --green-dark: #C0DD97;
+      --coral-light: #4A1B0C; --coral-dark: #F5C4B3;
+      --red-light: #501313; --red-dark: #F7C1C1;
+      --gray-light: #2C2C2A; --gray-dark: #D3D1C7;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  input, select, button, textarea { font-family: inherit; }
+
+  /* Layout */
+  .app { display: flex; height: 100vh; overflow: hidden; }
+  .sidebar { width: 210px; flex-shrink: 0; background: var(--surface); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
+  .main { flex: 1; overflow-y: auto; }
+  .main-inner { padding: 24px 28px; max-width: 1100px; }
+
+  /* Sidebar */
+  .sidebar-logo { padding: 18px 16px 12px; border-bottom: 0.5px solid var(--border); }
+  .logo-name { font-size: 17px; font-weight: 500; color: var(--text); letter-spacing: -0.3px; }
+  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .sidebar-nav { padding: 8px 8px; flex: 1; overflow-y: auto; }
+  .nav-section-label { font-size: 10px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.6px; padding: 10px 8px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 8px; padding: 7px 10px; border-radius: var(--radius-md); cursor: pointer; font-size: 13px; color: var(--text2); margin-bottom: 1px; border: none; background: transparent; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--surface2); color: var(--text); }
+  .nav-item.active { background: var(--purple-light); color: var(--purple-dark); font-weight: 500; }
+  .nav-icon { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.7; }
+  .nav-badge { margin-left: auto; background: var(--surface2); color: var(--text3); font-size: 10px; padding: 1px 6px; border-radius: 20px; }
+  .nav-item.active .nav-badge { background: var(--purple); color: #fff; }
+  .sidebar-footer { padding: 12px 12px; border-top: 0.5px solid var(--border); }
+  .refresh-btn { width: 100%; padding: 7px 12px; font-size: 12px; border: 0.5px solid var(--border2); border-radius: var(--radius-md); background: transparent; color: var(--text2); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .refresh-btn:hover { background: var(--surface2); }
+  .last-refresh { font-size: 10px; color: var(--text3); text-align: center; margin-top: 5px; }
+
+  /* Stats grid */
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: var(--surface2); border-radius: var(--radius-md); padding: 12px 14px; }
+  .stat-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .stat-value { font-size: 24px; font-weight: 500; line-height: 1.1; }
+  .stat-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+  .stat-delta { font-size: 10px; font-weight: 500; margin-top: 3px; }
+  .delta-up { color: var(--teal); }
+  .delta-down { color: var(--coral); }
+
+  /* Cards */
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; margin-bottom: 16px; }
+  .card-title { font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 12px; }
+
+  /* Chart container */
+  .chart-wrap { position: relative; height: 200px; }
+  .charts-row { display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 16px; }
+
+  /* Page header */
+  .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+  .page-title { font-size: 18px; font-weight: 500; color: var(--text); }
+  .page-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* Bot list */
+  .bot-list-wrap { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; }
+  .bot-list-panel { border: 0.5px solid var(--border); border-radius: var(--radius-lg); background: var(--surface); overflow: hidden; display: flex; flex-direction: column; height: 520px; }
+  .panel-header { padding: 10px 14px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .panel-header input { flex: 1; padding: 6px 10px; font-size: 12px; border: 0.5px solid var(--border); border-radius: var(--radius-md); background: var(--surface2); color: var(--text); outline: none; }
+  .panel-header input:focus { border-color: var(--purple); }
+  .panel-header select { padding: 6px 8px; font-size: 11px; border: 0.5px solid var(--border); border-radius: var(--radius-md); background: var(--surface2); color: var(--text); cursor: pointer; }
+  .panel-body { flex: 1; overflow-y: auto; }
+
+  /* Bot row */
+  .bot-row { display: flex; align-items: center; gap: 9px; padding: 8px 12px; cursor: pointer; border-bottom: 0.5px solid var(--border); transition: background 0.1s; }
+  .bot-row:hover { background: var(--surface2); }
+  .bot-row.selected { background: var(--purple-light); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; }
+  .avatar-active { background: var(--teal-light); color: var(--teal-dark); }
+  .avatar-waitlist { background: var(--blue-light); color: var(--blue-dark); }
+  .avatar-inactive { background: var(--gray-light); color: var(--gray-dark); }
+  .bot-info { flex: 1; min-width: 0; }
+  .bot-name { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bot-meta { font-size: 10px; color: var(--text3); margin-top: 1px; }
+  .bot-badges { display: flex; gap: 3px; align-items: center; flex-shrink: 0; }
+
+  /* Pills */
+  .pill { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 20px; white-space: nowrap; }
+  .pill-teal { background: var(--teal-light); color: var(--teal-dark); }
+  .pill-blue { background: var(--blue-light); color: var(--blue-dark); }
+  .pill-green { background: var(--green-light); color: var(--green-dark); }
+  .pill-amber { background: var(--amber-light); color: var(--amber-dark); }
+  .pill-purple { background: var(--purple-light); color: var(--purple-dark); }
+  .pill-red { background: var(--red-light); color: var(--red-dark); }
+  .pill-gray { background: var(--gray-light); color: var(--gray-dark); }
+  .pill-coral { background: var(--coral-light); color: var(--coral-dark); }
+
+  /* Conversation pane */
+  .conv-pane { display: flex; flex-direction: column; height: 100%; }
+  .conv-header { padding: 10px 14px; border-bottom: 0.5px solid var(--border); flex-shrink: 0; }
+  .conv-header-name { font-size: 13px; font-weight: 500; }
+  .conv-header-meta { font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .conv-messages { flex: 1; overflow-y: auto; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; }
+  .msg-wrap { max-width: 85%; }
+  .msg-wrap.user { align-self: flex-start; }
+  .msg-wrap.assistant { align-self: flex-end; }
+  .msg-bubble { padding: 7px 11px; font-size: 12px; line-height: 1.5; border-radius: 10px; }
+  .msg-bubble.user { background: var(--gray-light); color: var(--text); border-radius: 10px 10px 10px 2px; }
+  .msg-bubble.assistant { background: var(--purple-light); color: var(--purple-dark); border-radius: 10px 10px 2px 10px; }
+  .msg-time { font-size: 9px; color: var(--text3); margin-top: 2px; }
+  .msg-time.right { text-align: right; }
+  .conv-empty { color: var(--text3); font-size: 12px; text-align: center; margin-top: 40px; }
+  .conv-select-hint { display: flex; align-items: center; justify-content: center; height: 100%; color: var(--text3); font-size: 12px; }
+
+  /* Waitlist table */
+  .table-wrap { border: 0.5px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { padding: 9px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text3); border-bottom: 0.5px solid var(--border); background: var(--surface2); }
+  td { padding: 9px 14px; border-bottom: 0.5px solid var(--border); color: var(--text); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  /* Messages feed */
+  .msg-feed-item { display: flex; align-items: flex-start; gap: 10px; padding: 9px 14px; border-bottom: 0.5px solid var(--border); }
+  .msg-feed-avatar { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; margin-top: 1px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 500; }
+  .msg-feed-body { flex: 1; min-width: 0; }
+  .msg-feed-meta { display: flex; gap: 8px; margin-bottom: 2px; align-items: center; }
+  .msg-feed-company { font-size: 11px; font-weight: 500; color: var(--text2); }
+  .msg-feed-time { font-size: 10px; color: var(--text3); }
+  .msg-feed-text { font-size: 12px; color: var(--text); line-height: 1.5; word-break: break-word; }
+
+  /* Funnel */
+  .funnel-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--border); }
+  .funnel-row:last-child { border-bottom: none; }
+  .funnel-label { font-size: 12px; color: var(--text2); width: 130px; flex-shrink: 0; }
+  .funnel-bar-wrap { flex: 1; height: 8px; background: var(--surface3); border-radius: 4px; overflow: hidden; }
+  .funnel-bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+  .funnel-count { font-size: 12px; font-weight: 500; color: var(--text); width: 40px; text-align: right; flex-shrink: 0; }
+  .funnel-pct { font-size: 10px; color: var(--text3); width: 35px; text-align: right; flex-shrink: 0; }
+
+  /* Health indicators */
+  .health-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; }
+  .health-card { border: 0.5px solid var(--border); border-radius: var(--radius-md); padding: 10px 12px; background: var(--surface); }
+  .health-card-name { font-size: 12px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .health-card-meta { font-size: 10px; color: var(--text3); margin-top: 2px; }
+  .health-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--teal); }
+  .dot-amber { background: var(--amber); }
+  .dot-red { background: var(--red); }
+  .dot-gray { background: var(--gray); }
+
+  /* Tabs */
+  .tab-bar { display: flex; gap: 2px; margin-bottom: 14px; }
+  .tab-btn { font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 20px; border: none; background: transparent; color: var(--text3); cursor: pointer; }
+  .tab-btn:hover { background: var(--surface2); color: var(--text); }
+  .tab-btn.active { background: var(--surface3); color: var(--text); }
+
+  /* Buttons */
+  .btn { display: inline-flex; align-items: center; gap: 5px; padding: 6px 12px; font-size: 12px; border: 0.5px solid var(--border2); border-radius: var(--radius-md); background: transparent; color: var(--text2); cursor: pointer; }
+  .btn:hover { background: var(--surface2); }
+  .btn-primary { background: var(--purple); color: #fff; border-color: var(--purple); }
+  .btn-primary:hover { background: var(--purple-dark); border-color: var(--purple-dark); }
+
+  /* Empty state */
+  .empty { padding: 32px; text-align: center; color: var(--text3); font-size: 12px; }
+
+  /* Loading */
+  .loading { padding: 24px; text-align: center; color: var(--text3); font-size: 12px; }
+
+  /* Channel breakdown */
+  .channel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .channel-item { background: var(--surface2); border-radius: var(--radius-md); padding: 10px 12px; }
+  .channel-label { font-size: 11px; color: var(--text3); }
+  .channel-value { font-size: 20px; font-weight: 500; margin-top: 2px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+  /* Bot detail drawer */
+  .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.25); z-index: 100; display: flex; align-items: stretch; justify-content: flex-end; }
+  .drawer { width: 420px; background: var(--surface); display: flex; flex-direction: column; overflow: hidden; border-left: 0.5px solid var(--border2); }
+  .drawer-header { padding: 16px 18px; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .drawer-close { margin-left: auto; background: var(--surface2); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 16px; color: var(--text2); display: flex; align-items: center; justify-content: center; }
+  .drawer-close:hover { background: var(--surface3); }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 16px 18px; }
+  .drawer-section { margin-bottom: 20px; }
+  .drawer-section-title { font-size: 11px; font-weight: 500; color: var(--text3); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .kv-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 5px 0; border-bottom: 0.5px solid var(--border); font-size: 12px; gap: 12px; }
+  .kv-row:last-child { border-bottom: none; }
+  .kv-key { color: var(--text3); flex-shrink: 0; }
+  .kv-val { color: var(--text); font-weight: 500; text-align: right; word-break: break-all; }
+
+  /* Prompt preview */
+  .prompt-preview { background: var(--surface2); border-radius: var(--radius-md); padding: 10px 12px; font-size: 11px; color: var(--text2); line-height: 1.6; max-height: 200px; overflow-y: auto; white-space: pre-wrap; word-break: break-word; }
+
+  /* Stale badge */
+  .stale-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; padding: 2px 7px; border-radius: 20px; }
+
+  /* Export CSV button action */
+  .export-btn { cursor: pointer; }
+
+  /* Responsive collapse */
+  @media (max-width: 700px) {
+    .sidebar { display: none; }
+    .charts-row { grid-template-columns: 1fr; }
+    .bot-list-wrap { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
-<div id="root"></div>
+<div class="app">
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-name">Auras</div>
+      <div class="logo-sub">Bot monitoring</div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section-label">Views</div>
+      <button class="nav-item active" onclick="setView('overview')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><rect x="1" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.8"/><rect x="9" y="1" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.8"/><rect x="1" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.4"/><rect x="9" y="9" width="6" height="6" rx="1.5" fill="currentColor" opacity="0.4"/></svg>
+        Overview
+      </button>
+      <button class="nav-item" onclick="setView('bots')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="5" r="3" fill="currentColor" opacity="0.8"/><path d="M2 13c0-2.761 2.686-5 6-5s6 2.239 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" opacity="0.8"/></svg>
+        Bots
+        <span class="nav-badge" id="nav-badge-bots">0</span>
+      </button>
+      <button class="nav-item" onclick="setView('waitlist')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 1L10 6H15L11 9.5L12.5 14.5L8 11.5L3.5 14.5L5 9.5L1 6H6L8 1Z" fill="currentColor" opacity="0.8"/></svg>
+        Waitlist
+        <span class="nav-badge" id="nav-badge-waitlist">0</span>
+      </button>
+      <button class="nav-item" onclick="setView('messages')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 3C2 2.448 2.448 2 3 2H13C13.552 2 14 2.448 14 3V10C14 10.552 13.552 11 13 11H9L6 14V11H3C2.448 11 2 10.552 2 10V3Z" fill="currentColor" opacity="0.8"/></svg>
+        All messages
+        <span class="nav-badge" id="nav-badge-msgs">0</span>
+      </button>
+      <button class="nav-item" onclick="setView('health')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M8 2L9.5 6H14L10.5 8.5L12 13L8 10.5L4 13L5.5 8.5L2 6H6.5L8 2Z" stroke="currentColor" stroke-width="1.3" fill="none" opacity="0.8"/></svg>
+        Bot health
+      </button>
+      <button class="nav-item" onclick="setView('funnel')">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none"><path d="M2 3H14L10 8V13L6 11V8L2 3Z" fill="currentColor" opacity="0.8"/></svg>
+        Funnel
+      </button>
+    </div>
+    <div class="sidebar-footer">
+      <button class="refresh-btn" onclick="loadData(true)">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M14 8A6 6 0 0 1 3 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 8A6 6 0 0 1 13 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M2 5L2 8L5 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M14 11L14 8L11 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Refresh
+      </button>
+      <div class="last-refresh" id="last-refresh">Never refreshed</div>
+    </div>
+  </nav>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="main-inner" id="main-inner">
+      <div class="loading">Loading dashboard...</div>
+    </div>
+  </main>
+</div>
+
+<!-- Bot detail drawer -->
+<div class="drawer-overlay" id="drawer" style="display:none;" onclick="closeDrawer(event)">
+  <div class="drawer" onclick="event.stopPropagation()">
+    <div class="drawer-header">
+      <div class="avatar avatar-active" id="drawer-avatar" style="width:38px;height:38px;font-size:13px;"></div>
+      <div>
+        <div style="font-size:14px;font-weight:500;" id="drawer-name"></div>
+        <div style="font-size:11px;color:var(--text3);" id="drawer-keyword"></div>
+      </div>
+      <button class="drawer-close" onclick="closeDrawerDirect()">×</button>
+    </div>
+    <div class="drawer-body" id="drawer-body"></div>
+  </div>
+</div>
+
 <script>
-const { useState, useEffect, useRef } = React;
 const SUPABASE_URL = "https://xyxyqtomvsqqfdembomk.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh5eHlxdG9tdnNxcWZkZW1ib21rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MTE0NjgsImV4cCI6MjA5MjE4NzQ2OH0.fJWu9xweGvYn9cEGlHa3jcZXQvDzlKWS6ATxlEZ0DnQ";
 const hdrs = { apikey: SUPABASE_KEY, Authorization: `Bearer ${SUPABASE_KEY}` };
 
+let allBots = [], allConvs = [];
+let currentView = "overview";
+let chartInstances = {};
+
 async function apiFetch(path) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: hdrs });
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
   return r.json();
 }
 
-function pill(text, bg, col) {
-  return React.createElement("span", { style: { background: bg, color: col, fontSize: 10, fontWeight: 500, padding: "2px 7px", borderRadius: 20, whiteSpace: "nowrap" } }, text);
-}
-
-function StatCard({ label, value, color }) {
-  return React.createElement("div", { style: { background: "#f0f0ee", borderRadius: 8, padding: "12px 14px", flex: 1, minWidth: 0 } },
-    React.createElement("div", { style: { fontSize: 11, color: "#888", marginBottom: 4 } }, label),
-    React.createElement("div", { style: { fontSize: 24, fontWeight: 500, color } }, value)
-  );
-}
-
-function ActivityChart({ bots, convs }) {
-  const canvasRef = useRef(null);
-  const chartRef = useRef(null);
-
-  useEffect(() => {
-    if (!canvasRef.current || !bots.length) return;
-    if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; }
-
-    const botIds = new Set(convs.map(c => c.bot_id));
-    const activeBots = bots.filter(b => botIds.has(b.id));
-    const sorted = [...activeBots].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    if (!sorted.length) return;
-
-    const start = new Date(sorted[0].created_at);
-    const end = new Date();
-    const days = [];
-    const d = new Date(start);
-    d.setHours(0,0,0,0);
-    while (d <= end) { days.push(d.toISOString().split("T")[0]); d.setDate(d.getDate() + 1); }
-
-    const counts = {};
-    days.forEach(day => { counts[day] = 0; });
-    activeBots.forEach(bot => {
-      const day = bot.created_at.split("T")[0];
-      if (counts[day] !== undefined) counts[day]++;
-    });
-
-    let cum = 0;
-    const cumData = days.map(day => { cum += counts[day]; return cum; });
-
-    chartRef.current = new Chart(canvasRef.current, {
-      type: "line",
-      data: {
-        labels: days.map(d => { const dt = new Date(d); return dt.toLocaleDateString([], { month: "short", day: "numeric" }); }),
-        datasets: [{ label: "Bots with interactions", data: cumData, borderColor: "#7F77DD", backgroundColor: "rgba(127,119,221,0.08)", borderWidth: 2, pointRadius: cumData.length > 14 ? 0 : 3, pointBackgroundColor: "#7F77DD", fill: true, tension: 0.3 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.parsed.y} bots` } } },
-        scales: {
-          x: { grid: { color: "rgba(128,128,128,0.1)" }, ticks: { color: "#888", font: { size: 11 }, maxTicksLimit: 8, maxRotation: 0 } },
-          y: { grid: { color: "rgba(128,128,128,0.1)" }, ticks: { color: "#888", font: { size: 11 }, stepSize: 1 }, beginAtZero: true }
-        }
-      }
-    });
-    return () => { if (chartRef.current) { chartRef.current.destroy(); chartRef.current = null; } };
-  }, [bots, convs]);
-
-  return React.createElement("div", { style: { border: "0.5px solid #ddd", borderRadius: 12, padding: "14px 16px", marginBottom: 16, background: "#fff" } },
-    React.createElement("div", { style: { fontSize: 12, fontWeight: 500, color: "#888", marginBottom: 10 } }, "Bots with interactions over time"),
-    React.createElement("div", { style: { position: "relative", height: 180 } },
-      React.createElement("canvas", { ref: canvasRef, role: "img", "aria-label": "Cumulative bots with interactions over time" }, "Cumulative bots with interactions over time.")
-    )
-  );
-}
-
-function BotRow({ bot, msgCount, lastActivity, selected, onClick }) {
-  const initials = (bot.company_name || "??").substring(0, 2).toUpperCase();
-  const hasPhone = bot.contact_phone && bot.contact_phone !== "NULL";
-  const hasEmail = bot.contact_email && bot.contact_email !== "NULL";
-  const isWaitlist = bot.waitlist === true;
-  const isActive = msgCount > 0;
-
-  const timeAgo = lastActivity ? (() => {
-    const diff = Date.now() - new Date(lastActivity);
-    const mins = Math.floor(diff / 60000);
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    return `${Math.floor(hrs / 24)}d ago`;
-  })() : null;
-
-  return React.createElement("div", {
-    onClick,
-    style: { display: "flex", alignItems: "center", gap: 10, padding: "9px 12px", cursor: "pointer", borderBottom: "0.5px solid #eee", background: selected ? "#f5f5f3" : "transparent" }
-  },
-    React.createElement("div", { style: { width: 34, height: 34, borderRadius: "50%", flexShrink: 0, background: isActive ? "#E1F5EE" : "#F1EFE8", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, color: isActive ? "#0F6E56" : "#5F5E5A" } }, initials),
-    React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-      React.createElement("div", { style: { fontSize: 13, fontWeight: 500, color: "#1a1a1a", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" } }, bot.company_name || "Unknown"),
-      React.createElement("div", { style: { fontSize: 10, color: "#888", marginTop: 1, display: "flex", gap: 6 } },
-        React.createElement("span", null, bot.trigger_keyword),
-        timeAgo && React.createElement("span", null, `· ${timeAgo}`)
-      )
-    ),
-    React.createElement("div", { style: { display: "flex", gap: 3, alignItems: "center", flexShrink: 0 } },
-      msgCount > 0 && React.createElement("span", { style: { background: "#E1F5EE", color: "#0F6E56", fontSize: 10, fontWeight: 500, padding: "2px 7px", borderRadius: 20 } }, `${msgCount} msg${msgCount !== 1 ? "s" : ""}`),
-      isWaitlist && pill("waitlist", "#E6F1FB", "#185FA5"),
-      hasPhone && pill("ph", "#EAF3DE", "#3B6D11"),
-      hasEmail && pill("em", "#FAEEDA", "#854F0B")
-    )
-  );
-}
-
-function ConversationPane({ bot, conversations }) {
-  if (!bot) return React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "center", height: "100%", color: "#888", fontSize: 13 } }, "Select a bot to view conversation");
-  const msgs = conversations.filter(c => c.bot_id === bot.id);
-  return React.createElement("div", { style: { display: "flex", flexDirection: "column", height: "100%" } },
-    React.createElement("div", { style: { padding: "10px 14px", borderBottom: "0.5px solid #eee", flexShrink: 0 } },
-      React.createElement("div", { style: { fontSize: 13, fontWeight: 500, color: "#1a1a1a" } }, bot.company_name),
-      React.createElement("div", { style: { fontSize: 10, color: "#888", marginTop: 2 } }, `${bot.trigger_keyword} · ${(bot.contact_phone || "").replace("whatsapp:", "") || "no phone"}`)
-    ),
-    React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "10px 14px", display: "flex", flexDirection: "column", gap: 7 } },
-      msgs.length === 0
-        ? React.createElement("div", { style: { color: "#888", fontSize: 12, textAlign: "center", marginTop: 20 } }, "No messages yet")
-        : msgs.map(msg => React.createElement("div", { key: msg.id, style: { alignSelf: msg.role === "user" ? "flex-start" : "flex-end", maxWidth: "85%" } },
-            React.createElement("div", { style: { background: msg.role === "user" ? "#f0f0ee" : "#EEEDFE", color: msg.role === "user" ? "#1a1a1a" : "#3C3489", borderRadius: msg.role === "user" ? "10px 10px 10px 2px" : "10px 10px 2px 10px", padding: "7px 11px", fontSize: 12, lineHeight: 1.5 } }, msg.message_text),
-            React.createElement("div", { style: { fontSize: 9, color: "#888", marginTop: 2, textAlign: msg.role === "user" ? "left" : "right" } }, new Date(msg.created_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }))
-          ))
-    )
-  );
-}
-
-function App() {
-  const [bots, setBots] = useState([]);
-  const [convs, setConvs] = useState([]);
-  const [selected, setSelected] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("bots");
-  const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-
-  async function load() {
-    setLoading(true);
-    try {
-      const [b, c] = await Promise.all([
-        apiFetch("bots?select=*&order=created_at.desc"),
-        apiFetch("conversations?select=*&order=created_at.asc&limit=500")
-      ]);
-      setBots(Array.isArray(b) ? b : []);
-      setConvs(Array.isArray(c) ? c : []);
-    } catch(e) { console.error(e); }
-    setLoading(false);
+async function loadData(manual = false) {
+  document.getElementById("last-refresh").textContent = "Loading...";
+  try {
+    const [b, c] = await Promise.all([
+      apiFetch("bots?select=*&order=created_at.desc"),
+      apiFetch("conversations?select=*&order=created_at.asc&limit=2000")
+    ]);
+    allBots = Array.isArray(b) ? b : [];
+    allConvs = Array.isArray(c) ? c : [];
+    updateNavBadges();
+    renderView(currentView);
+    document.getElementById("last-refresh").textContent = "Updated " + new Date().toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"});
+  } catch(e) {
+    console.error(e);
+    document.getElementById("last-refresh").textContent = "Error loading";
+    if (manual) alert("Failed to load data. Check console.");
   }
+}
 
-  useEffect(() => { load(); }, []);
+function updateNavBadges() {
+  const activeBotIds = new Set(allConvs.map(c => c.bot_id));
+  document.getElementById("nav-badge-bots").textContent = allBots.length;
+  document.getElementById("nav-badge-waitlist").textContent = allBots.filter(b => b.waitlist || b.Waitlist).length;
+  document.getElementById("nav-badge-msgs").textContent = allConvs.length;
+}
 
-  const msgCountMap = {};
-  const lastActivityMap = {};
-  convs.forEach(c => {
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+  event.currentTarget.classList.add("active");
+  renderView(v);
+}
+
+function renderView(v) {
+  destroyAllCharts();
+  const el = document.getElementById("main-inner");
+  if (v === "overview") el.innerHTML = buildOverview();
+  else if (v === "bots") el.innerHTML = buildBots();
+  else if (v === "waitlist") el.innerHTML = buildWaitlist();
+  else if (v === "messages") el.innerHTML = buildMessages();
+  else if (v === "health") el.innerHTML = buildHealth();
+  else if (v === "funnel") el.innerHTML = buildFunnel();
+  afterRender(v);
+}
+
+function destroyAllCharts() {
+  Object.values(chartInstances).forEach(c => { try { c.destroy(); } catch(e){} });
+  chartInstances = {};
+}
+
+// ─── Derived data helpers ────────────────────────────────────────
+function getDerived() {
+  const msgCountMap = {}, lastActivityMap = {}, firstMsgMap = {};
+  allConvs.forEach(c => {
     msgCountMap[c.bot_id] = (msgCountMap[c.bot_id] || 0) + 1;
     if (!lastActivityMap[c.bot_id] || c.created_at > lastActivityMap[c.bot_id]) lastActivityMap[c.bot_id] = c.created_at;
+    if (!firstMsgMap[c.bot_id] || c.created_at < firstMsgMap[c.bot_id]) firstMsgMap[c.bot_id] = c.created_at;
   });
-
-  const activeBotIds = new Set(convs.map(c => c.bot_id));
-  const totalActive = bots.filter(b => activeBotIds.has(b.id)).length;
-  const waitlistCount = bots.filter(b => !!(b.waitlist || b.Waitlist)).length;
-
-  let filtered = bots.filter(b => {
-    if (search && !(b.company_name || "").toLowerCase().includes(search.toLowerCase()) && !(b.trigger_keyword || "").toLowerCase().includes(search.toLowerCase())) return false;
-    if (filter === "active" && !activeBotIds.has(b.id)) return false;
-    if (filter === "waitlist" && !b.waitlist) return false;
-    if (filter === "inactive" && activeBotIds.has(b.id)) return false;
-    return true;
-  }).sort((a, b) => new Date(lastActivityMap[b.id] || b.created_at) - new Date(lastActivityMap[a.id] || a.created_at));
-
-  const tabBtn = (t, label) => React.createElement("button", {
-    onClick: () => setTab(t),
-    style: { fontSize: 12, fontWeight: 500, padding: "5px 12px", borderRadius: 20, border: "none", background: tab === t ? "#e8e8e6" : "transparent", color: tab === t ? "#1a1a1a" : "#888" }
-  }, label);
-
-  return React.createElement("div", { style: { maxWidth: 960, margin: "0 auto" } },
-    React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 } },
-      React.createElement("div", null,
-        React.createElement("div", { style: { fontSize: 20, fontWeight: 500, color: "#1a1a1a" } }, "Auras"),
-        React.createElement("div", { style: { fontSize: 11, color: "#888", marginTop: 1 } }, "Bot monitoring dashboard")
-      ),
-      React.createElement("button", { onClick: load }, loading ? "Loading..." : "Refresh")
-    ),
-
-    React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 16 } },
-      React.createElement(StatCard, { label: "Total bots", value: bots.length, color: "#7F77DD" }),
-      React.createElement(StatCard, { label: "Active (interacted)", value: totalActive, color: "#1D9E75" }),
-      React.createElement(StatCard, { label: "Waitlist", value: waitlistCount, color: "#185FA5" }),
-      React.createElement(StatCard, { label: "Messages", value: convs.length, color: "#BA7517" })
-    ),
-
-    React.createElement(ActivityChart, { bots, convs }),
-
-    React.createElement("div", { style: { display: "flex", gap: 2, marginBottom: 12 } },
-      tabBtn("bots", "Bots"),
-      tabBtn("waitlist", `Waitlist (${waitlistCount})`),
-      tabBtn("conversations", "All messages")
-    ),
-
-    tab === "bots" && React.createElement("div", null,
-      React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 10 } },
-        React.createElement("input", { placeholder: "Search...", value: search, onChange: e => setSearch(e.target.value) }),
-        React.createElement("select", { value: filter, onChange: e => setFilter(e.target.value) },
-          React.createElement("option", { value: "all" }, "All bots"),
-          React.createElement("option", { value: "active" }, "Interacted"),
-          React.createElement("option", { value: "inactive" }, "No interaction"),
-          React.createElement("option", { value: "waitlist" }, "Waitlist only")
-        )
-      ),
-      React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, height: 400 } },
-        React.createElement("div", { style: { border: "0.5px solid #ddd", borderRadius: 12, overflowY: "auto", background: "#fff" } },
-          loading
-            ? React.createElement("div", { style: { padding: 20, color: "#888", fontSize: 13 } }, "Loading...")
-            : filtered.length === 0
-              ? React.createElement("div", { style: { padding: 20, color: "#888", fontSize: 13 } }, "No bots match filter")
-              : filtered.map(bot => React.createElement(BotRow, { key: bot.id, bot, msgCount: msgCountMap[bot.id] || 0, lastActivity: lastActivityMap[bot.id], selected: selected?.id === bot.id, onClick: () => setSelected(bot) }))
-        ),
-        React.createElement("div", { style: { border: "0.5px solid #ddd", borderRadius: 12, overflow: "hidden", background: "#fff" } },
-          React.createElement(ConversationPane, { bot: selected, conversations: convs })
-        )
-      )
-    ),
-
-    tab === "waitlist" && React.createElement("div", { style: { border: "0.5px solid #ddd", borderRadius: 12, overflow: "hidden", background: "#fff" } },
-      bots.filter(b => b.waitlist).length === 0
-        ? React.createElement("div", { style: { padding: 20, color: "#888", fontSize: 13 } }, "No waitlist signups yet")
-        : bots.filter(b => b.waitlist).map(bot => React.createElement("div", { key: bot.id, style: { display: "flex", alignItems: "center", gap: 12, padding: "11px 16px", borderBottom: "0.5px solid #eee" } },
-            React.createElement("div", { style: { width: 34, height: 34, borderRadius: "50%", background: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 500, color: "#185FA5" } }, (bot.company_name || "??").substring(0, 2).toUpperCase()),
-            React.createElement("div", { style: { flex: 1 } },
-              React.createElement("div", { style: { fontSize: 13, fontWeight: 500 } }, bot.company_name),
-              React.createElement("div", { style: { fontSize: 11, color: "#888", marginTop: 1 } }, `${(bot.contact_phone || "").replace("whatsapp:", "") || "no phone"} · ${bot.contact_email || "no email"}`)
-            ),
-            React.createElement("div", { style: { fontSize: 11, color: "#888" } }, new Date(bot.created_at).toLocaleDateString()),
-            React.createElement("div", { style: { fontSize: 11, color: "#1D9E75", fontWeight: 500 } }, `${msgCountMap[bot.id] || 0} msgs`)
-          ))
-    ),
-
-    tab === "conversations" && React.createElement("div", { style: { border: "0.5px solid #ddd", borderRadius: 12, overflow: "hidden", background: "#fff", maxHeight: 500, overflowY: "auto" } },
-      convs.length === 0
-        ? React.createElement("div", { style: { padding: 20, color: "#888", fontSize: 13 } }, "No conversations yet")
-        : [...convs].reverse().slice(0, 150).map(msg => {
-            const bot = bots.find(b => b.id === msg.bot_id);
-            return React.createElement("div", { key: msg.id, style: { display: "flex", alignItems: "flex-start", gap: 10, padding: "9px 14px", borderBottom: "0.5px solid #eee" } },
-              React.createElement("div", { style: { width: 26, height: 26, borderRadius: "50%", flexShrink: 0, marginTop: 1, background: msg.role === "user" ? "#E1F5EE" : "#EEEDFE", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 9, fontWeight: 500, color: msg.role === "user" ? "#0F6E56" : "#534AB7" } }, msg.role === "user" ? "U" : "AI"),
-              React.createElement("div", { style: { flex: 1, minWidth: 0 } },
-                React.createElement("div", { style: { display: "flex", gap: 8, marginBottom: 2 } },
-                  React.createElement("span", { style: { fontSize: 11, fontWeight: 500, color: "#888" } }, bot?.company_name || "Unknown"),
-                  React.createElement("span", { style: { fontSize: 10, color: "#aaa" } }, new Date(msg.created_at).toLocaleString([], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }))
-                ),
-                React.createElement("div", { style: { fontSize: 12, color: "#1a1a1a", lineHeight: 1.5, wordBreak: "break-word" } },
-                  (msg.message_text || "").substring(0, 200) + ((msg.message_text || "").length > 200 ? "..." : "")
-                )
-              )
-            );
-          })
-    )
-  );
+  const activeBotIds = new Set(allConvs.map(c => c.bot_id));
+  const waitlistBots = allBots.filter(b => b.waitlist || b.Waitlist);
+  const totalMsgs = allConvs.length;
+  const avgMsgs = activeBotIds.size > 0 ? Math.round(totalMsgs / activeBotIds.size) : 0;
+  return { msgCountMap, lastActivityMap, firstMsgMap, activeBotIds, waitlistBots, totalMsgs, avgMsgs };
 }
 
-ReactDOM.render(React.createElement(App), document.getElementById("root"));
+function timeAgo(ts) {
+  if (!ts) return null;
+  const diff = Date.now() - new Date(ts);
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
+}
+
+function fmtDate(ts) {
+  if (!ts) return "—";
+  return new Date(ts).toLocaleDateString([], {day:"numeric",month:"short"});
+}
+
+function fmtPhone(p) {
+  return (p || "").replace("whatsapp:", "") || "—";
+}
+
+function botStatus(bot, activeBotIds) {
+  if (!activeBotIds.has(bot.id)) return "prospected";
+  if (bot.waitlist || bot.Waitlist) return "waitlist";
+  return "active";
+}
+
+function initials(name) { return (name || "??").substring(0, 2).toUpperCase(); }
+
+// ─── Overview ───────────────────────────────────────────────────
+function buildOverview() {
+  const { msgCountMap, lastActivityMap, activeBotIds, waitlistBots, totalMsgs, avgMsgs } = getDerived();
+  const convRate = allBots.length > 0 ? Math.round((activeBotIds.size / allBots.length) * 100) : 0;
+  const waitlistRate = allBots.length > 0 ? Math.round((waitlistBots.length / allBots.length) * 100) : 0;
+  const botsWithPhone = allBots.filter(b => b.contact_phone && b.contact_phone !== "NULL").length;
+  const botsWithEmail = allBots.filter(b => b.contact_email && b.contact_email !== "NULL").length;
+
+  // 7-day message volume
+  const now = new Date();
+  const days7 = Array.from({length:7}, (_,i) => {
+    const d = new Date(now); d.setDate(d.getDate() - (6-i)); return d.toISOString().split("T")[0];
+  });
+  const msgByDay = {};
+  days7.forEach(d => msgByDay[d] = 0);
+  allConvs.forEach(c => { const d = c.created_at.split("T")[0]; if (msgByDay[d] !== undefined) msgByDay[d]++; });
+
+  return `
+  <div class="page-header">
+    <div><div class="page-title">Overview</div><div class="page-sub">All-time performance at a glance</div></div>
+    <div class="header-actions">
+      <button class="btn export-btn" onclick="exportCSV()">Export bots CSV</button>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Total bots</div>
+      <div class="stat-value" style="color:var(--purple)">${allBots.length}</div>
+      <div class="stat-sub">Prospected</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Interacted</div>
+      <div class="stat-value" style="color:var(--teal)">${activeBotIds.size}</div>
+      <div class="stat-sub">${convRate}% of total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Waitlist</div>
+      <div class="stat-value" style="color:var(--blue)">${waitlistBots.length}</div>
+      <div class="stat-sub">${waitlistRate}% of total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Messages</div>
+      <div class="stat-value" style="color:var(--amber)">${totalMsgs}</div>
+      <div class="stat-sub">${avgMsgs} avg per bot</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Phone reach</div>
+      <div class="stat-value" style="color:var(--green)">${botsWithPhone}</div>
+      <div class="stat-sub">Have phone</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Email reach</div>
+      <div class="stat-value" style="color:var(--coral)">${botsWithEmail}</div>
+      <div class="stat-sub">Have email</div>
+    </div>
+  </div>
+
+  <div class="charts-row">
+    <div class="card">
+      <div class="card-title">Messages last 7 days</div>
+      <div class="chart-wrap"><canvas id="chart-msgs7"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-title">Channel breakdown</div>
+      <div style="margin-bottom:10px;" class="channel-grid">
+        <div class="channel-item">
+          <div class="channel-label">Phone only</div>
+          <div class="channel-value" style="color:var(--green)">${allBots.filter(b=>b.contact_phone&&b.contact_phone!=="NULL"&&(!b.contact_email||b.contact_email==="NULL")).length}</div>
+        </div>
+        <div class="channel-item">
+          <div class="channel-label">Email only</div>
+          <div class="channel-value" style="color:var(--coral)">${allBots.filter(b=>b.contact_email&&b.contact_email!=="NULL"&&(!b.contact_phone||b.contact_phone==="NULL")).length}</div>
+        </div>
+        <div class="channel-item">
+          <div class="channel-label">Both</div>
+          <div class="channel-value" style="color:var(--purple)">${allBots.filter(b=>b.contact_phone&&b.contact_phone!=="NULL"&&b.contact_email&&b.contact_email!=="NULL").length}</div>
+        </div>
+        <div class="channel-item">
+          <div class="channel-label">Neither</div>
+          <div class="channel-value" style="color:var(--gray)">${allBots.filter(b=>(!b.contact_phone||b.contact_phone==="NULL")&&(!b.contact_email||b.contact_email==="NULL")).length}</div>
+        </div>
+      </div>
+      <div class="card-title" style="margin-top:6px;">Cumulative bots reached</div>
+      <div style="position:relative;height:80px;"><canvas id="chart-cumulative"></canvas></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title">Recent activity</div>
+    <div id="recent-activity-list"></div>
+  </div>
+  `;
+}
+
+// ─── Bots view ───────────────────────────────────────────────────
+function buildBots() {
+  return `
+  <div class="page-header">
+    <div><div class="page-title">Bots</div><div class="page-sub">All prospected bots and conversations</div></div>
+  </div>
+  <div class="panel-header" style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg) var(--radius-lg) 0 0;padding:10px 14px;gap:8px;display:flex;">
+    <input type="text" id="bot-search" placeholder="Search name or keyword..." oninput="renderBotList()" style="flex:1;"/>
+    <select id="bot-filter" onchange="renderBotList()">
+      <option value="all">All bots</option>
+      <option value="active">Interacted</option>
+      <option value="inactive">No interaction</option>
+      <option value="waitlist">Waitlist</option>
+      <option value="phone">Has phone</option>
+      <option value="email">Has email</option>
+    </select>
+    <select id="bot-sort" onchange="renderBotList()">
+      <option value="activity">Last activity</option>
+      <option value="msgs">Most messages</option>
+      <option value="name">Name A-Z</option>
+      <option value="created">Newest first</option>
+    </select>
+  </div>
+  <div class="bot-list-wrap" style="border-top:none;">
+    <div class="bot-list-panel" style="border-radius:0 0 0 var(--radius-lg);">
+      <div class="panel-body" id="bot-list-body"></div>
+    </div>
+    <div class="bot-list-panel" style="border-radius:0 0 var(--radius-lg) 0;" id="conv-pane">
+      <div class="conv-select-hint">Select a bot to view conversation</div>
+    </div>
+  </div>
+  `;
+}
+
+function renderBotList() {
+  const { msgCountMap, lastActivityMap, activeBotIds } = getDerived();
+  const search = (document.getElementById("bot-search")?.value || "").toLowerCase();
+  const filter = document.getElementById("bot-filter")?.value || "all";
+  const sort = document.getElementById("bot-sort")?.value || "activity";
+
+  let bots = allBots.filter(b => {
+    if (search && !(b.company_name||"").toLowerCase().includes(search) && !(b.trigger_keyword||"").toLowerCase().includes(search)) return false;
+    if (filter === "active" && !activeBotIds.has(b.id)) return false;
+    if (filter === "inactive" && activeBotIds.has(b.id)) return false;
+    if (filter === "waitlist" && !(b.waitlist||b.Waitlist)) return false;
+    if (filter === "phone" && (!b.contact_phone || b.contact_phone === "NULL")) return false;
+    if (filter === "email" && (!b.contact_email || b.contact_email === "NULL")) return false;
+    return true;
+  });
+
+  bots.sort((a, b) => {
+    if (sort === "msgs") return (msgCountMap[b.id]||0) - (msgCountMap[a.id]||0);
+    if (sort === "name") return (a.company_name||"").localeCompare(b.company_name||"");
+    if (sort === "created") return new Date(b.created_at) - new Date(a.created_at);
+    // activity (default)
+    const la = lastActivityMap[a.id] || a.created_at;
+    const lb = lastActivityMap[b.id] || b.created_at;
+    return new Date(lb) - new Date(la);
+  });
+
+  const body = document.getElementById("bot-list-body");
+  if (!body) return;
+  if (bots.length === 0) { body.innerHTML = '<div class="empty">No bots match this filter</div>'; return; }
+
+  body.innerHTML = bots.map(bot => {
+    const msgs = msgCountMap[bot.id] || 0;
+    const lastAct = lastActivityMap[bot.id];
+    const isActive = activeBotIds.has(bot.id);
+    const isWaitlist = bot.waitlist || bot.Waitlist;
+    const hasPhone = bot.contact_phone && bot.contact_phone !== "NULL";
+    const hasEmail = bot.contact_email && bot.contact_email !== "NULL";
+    const avatarClass = isWaitlist ? "avatar-waitlist" : isActive ? "avatar-active" : "avatar-inactive";
+    return `<div class="bot-row" onclick="selectBot(${bot.id})" id="botrow-${bot.id}">
+      <div class="avatar ${avatarClass}">${initials(bot.company_name)}</div>
+      <div class="bot-info">
+        <div class="bot-name">${bot.company_name || "Unknown"}</div>
+        <div class="bot-meta">${bot.trigger_keyword || ""}${lastAct ? " · " + timeAgo(lastAct) : ""}</div>
+      </div>
+      <div class="bot-badges">
+        ${msgs > 0 ? `<span class="pill pill-teal">${msgs} msg${msgs!==1?"s":""}</span>` : ""}
+        ${isWaitlist ? '<span class="pill pill-blue">waitlist</span>' : ""}
+        ${hasPhone ? '<span class="pill pill-green">ph</span>' : ""}
+        ${hasEmail ? '<span class="pill pill-amber">em</span>' : ""}
+      </div>
+    </div>`;
+  }).join("");
+}
+
+let selectedBotId = null;
+function selectBot(id) {
+  selectedBotId = id;
+  document.querySelectorAll(".bot-row").forEach(r => r.classList.remove("selected"));
+  const row = document.getElementById("botrow-"+id);
+  if (row) row.classList.add("selected");
+  renderConvPane(id);
+}
+
+function renderConvPane(botId) {
+  const pane = document.getElementById("conv-pane");
+  if (!pane) return;
+  const bot = allBots.find(b => b.id === botId);
+  if (!bot) return;
+  const msgs = allConvs.filter(c => c.bot_id === botId);
+  const phone = fmtPhone(bot.contact_phone);
+  pane.innerHTML = `
+    <div class="conv-pane">
+      <div class="conv-header">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="conv-header-name">${bot.company_name || "Unknown"}</div>
+            <div class="conv-header-meta">${bot.trigger_keyword} · ${phone}</div>
+          </div>
+          <button class="btn" onclick="openDrawer(${botId})" style="font-size:11px;">Details</button>
+        </div>
+      </div>
+      <div class="conv-messages">
+        ${msgs.length === 0
+          ? '<div class="conv-empty">No messages yet</div>'
+          : msgs.map(m => `
+            <div class="msg-wrap ${m.role}">
+              <div class="msg-bubble ${m.role}">${escapeHtml(m.message_text||"")}</div>
+              <div class="msg-time${m.role==="assistant"?" right":""}">${new Date(m.created_at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div>
+            </div>`).join("")
+        }
+      </div>
+    </div>`;
+}
+
+// ─── Waitlist view ───────────────────────────────────────────────
+function buildWaitlist() {
+  const { msgCountMap, activeBotIds } = getDerived();
+  const wl = allBots.filter(b => b.waitlist || b.Waitlist);
+  if (wl.length === 0) return `
+    <div class="page-header"><div><div class="page-title">Waitlist</div></div></div>
+    <div class="empty" style="background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius-lg);">No waitlist signups yet</div>`;
+
+  return `
+  <div class="page-header">
+    <div><div class="page-title">Waitlist</div><div class="page-sub">${wl.length} business${wl.length!==1?"es":""} interested in Auras</div></div>
+    <button class="btn export-btn" onclick="exportWaitlistCSV()">Export CSV</button>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr>
+        <th>Business</th><th>Phone</th><th>Email</th>
+        <th>Messages</th><th>Added</th><th>Keyword</th>
+      </tr></thead>
+      <tbody>
+        ${wl.map(b => `<tr onclick="openDrawer(${b.id})" style="cursor:pointer;">
+          <td>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <div class="avatar avatar-waitlist" style="width:28px;height:28px;font-size:10px;flex-shrink:0;">${initials(b.company_name)}</div>
+              <span style="font-weight:500;">${b.company_name||"Unknown"}</span>
+            </div>
+          </td>
+          <td>${fmtPhone(b.contact_phone)}</td>
+          <td>${b.contact_email||"—"}</td>
+          <td><span class="pill pill-teal">${msgCountMap[b.id]||0} msgs</span></td>
+          <td>${fmtDate(b.created_at)}</td>
+          <td><span class="pill pill-gray">${b.trigger_keyword||""}</span></td>
+        </tr>`).join("")}
+      </tbody>
+    </table>
+  </div>`;
+}
+
+// ─── Messages feed ───────────────────────────────────────────────
+function buildMessages() {
+  const recent = [...allConvs].reverse().slice(0, 200);
+  const botMap = {};
+  allBots.forEach(b => botMap[b.id] = b);
+  return `
+  <div class="page-header">
+    <div><div class="page-title">All messages</div><div class="page-sub">${allConvs.length} total messages</div></div>
+  </div>
+  <div class="table-wrap" style="max-height:calc(100vh - 120px);overflow-y:auto;">
+    ${recent.length === 0 ? '<div class="empty">No messages yet</div>' : recent.map(m => {
+      const bot = botMap[m.bot_id];
+      return `<div class="msg-feed-item">
+        <div class="msg-feed-avatar ${m.role==="user"?"pill-teal":"pill-purple"}">${m.role==="user"?"U":"AI"}</div>
+        <div class="msg-feed-body">
+          <div class="msg-feed-meta">
+            <span class="msg-feed-company">${bot?.company_name||"Unknown"}</span>
+            <span class="pill pill-gray" style="font-size:9px;">${m.role}</span>
+            <span class="msg-feed-time">${new Date(m.created_at).toLocaleString([],{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"})}</span>
+          </div>
+          <div class="msg-feed-text">${escapeHtml((m.message_text||"").substring(0,300))}${(m.message_text||"").length>300?"…":""}</div>
+        </div>
+      </div>`;
+    }).join("")}
+  </div>`;
+}
+
+// ─── Bot health ──────────────────────────────────────────────────
+function buildHealth() {
+  const { msgCountMap, lastActivityMap, activeBotIds } = getDerived();
+  const now = Date.now();
+
+  const scored = allBots.map(b => {
+    const lastAct = lastActivityMap[b.id];
+    const msgs = msgCountMap[b.id] || 0;
+    const hoursSince = lastAct ? (now - new Date(lastAct)) / 3600000 : Infinity;
+    let status = "cold"; // never interacted
+    if (msgs > 0) {
+      if (hoursSince < 24) status = "hot";
+      else if (hoursSince < 72) status = "warm";
+      else if (hoursSince < 168) status = "cooling";
+      else status = "stale";
+    }
+    return { ...b, status, msgs, lastAct, hoursSince };
+  });
+
+  const counts = { hot:0, warm:0, cooling:0, stale:0, cold:0 };
+  scored.forEach(b => counts[b.status]++);
+
+  const statusConfig = {
+    hot: { label: "Hot (<24h)", dotClass: "dot-green", pillClass: "pill-teal" },
+    warm: { label: "Warm (1-3d)", dotClass: "dot-green", pillClass: "pill-green" },
+    cooling: { label: "Cooling (3-7d)", dotClass: "dot-amber", pillClass: "pill-amber" },
+    stale: { label: "Stale (>7d)", dotClass: "dot-red", pillClass: "pill-coral" },
+    cold: { label: "No interaction", dotClass: "dot-gray", pillClass: "pill-gray" }
+  };
+
+  const filterOrder = ["hot","warm","cooling","stale","cold"];
+
+  return `
+  <div class="page-header">
+    <div><div class="page-title">Bot health</div><div class="page-sub">Activity status of all bots</div></div>
+  </div>
+  <div class="stats-grid" style="margin-bottom:16px;">
+    ${filterOrder.map(s => `<div class="stat-card">
+      <div class="stat-label">${statusConfig[s].label}</div>
+      <div class="stat-value" style="font-size:20px;">${counts[s]}</div>
+    </div>`).join("")}
+  </div>
+  <div class="card" style="margin-bottom:12px;">
+    <div class="card-title">All bots by status</div>
+    <div class="health-grid">
+      ${scored.sort((a,b)=>filterOrder.indexOf(a.status)-filterOrder.indexOf(b.status)).map(b => `
+        <div class="health-card" onclick="openDrawer(${b.id})" style="cursor:pointer;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+            <div class="health-dot ${statusConfig[b.status].dotClass}"></div>
+            <div class="health-card-name">${b.company_name||"Unknown"}</div>
+          </div>
+          <div class="health-card-meta">${b.msgs > 0 ? b.msgs+" msgs · "+timeAgo(b.lastAct) : "No messages"}</div>
+        </div>`).join("")}
+    </div>
+  </div>`;
+}
+
+// ─── Funnel view ─────────────────────────────────────────────────
+function buildFunnel() {
+  const { activeBotIds, waitlistBots } = getDerived();
+  const total = allBots.length;
+  const reached = allBots.filter(b => b.contact_phone && b.contact_phone !== "NULL").length;
+  const interacted = activeBotIds.size;
+  const waitlisted = waitlistBots.length;
+  const converted = 0; // paying customers, none yet
+
+  const steps = [
+    { label: "Prospected", value: total, color: "var(--purple)" },
+    { label: "Has phone (reached)", value: reached, color: "var(--blue)" },
+    { label: "Interacted with bot", value: interacted, color: "var(--teal)" },
+    { label: "Joined waitlist", value: waitlisted, color: "var(--amber)" },
+    { label: "Paying customers", value: converted, color: "var(--green)" },
+  ];
+
+  return `
+  <div class="page-header">
+    <div><div class="page-title">Conversion funnel</div><div class="page-sub">From prospect to customer</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Pipeline stages</div>
+    ${steps.map((s,i) => {
+      const pct = total > 0 ? Math.round((s.value / total) * 100) : 0;
+      const barW = total > 0 ? Math.max((s.value / total) * 100, 0) : 0;
+      return `<div class="funnel-row">
+        <div class="funnel-label">${s.label}</div>
+        <div class="funnel-bar-wrap"><div class="funnel-bar" style="width:${barW}%;background:${s.color};"></div></div>
+        <div class="funnel-count">${s.value}</div>
+        <div class="funnel-pct">${pct}%</div>
+      </div>`;
+    }).join("")}
+  </div>
+  <div class="card">
+    <div class="card-title">Drop-off analysis</div>
+    ${steps.slice(1).map((s,i) => {
+      const prev = steps[i].value;
+      const dropAbs = prev - s.value;
+      const dropPct = prev > 0 ? Math.round((dropAbs / prev) * 100) : 0;
+      return `<div class="funnel-row">
+        <div class="funnel-label" style="font-size:11px;color:var(--text3);">${steps[i].label} → ${s.label}</div>
+        <div style="flex:1;font-size:12px;color:var(--text2);">−${dropAbs} lost</div>
+        <div class="funnel-pct" style="color:${dropPct>50?"var(--red)":"var(--text3)"};">${dropPct}% drop</div>
+      </div>`;
+    }).join("")}
+    <div style="margin-top:12px;padding:10px 12px;background:var(--surface2);border-radius:var(--radius-md);font-size:12px;color:var(--text2);">
+      💡 <strong>Note:</strong> Phone outreach is blocked on Twilio sandbox. Once Wassenger + SIM is live, the "reached" stage will activate proper cold outreach.
+    </div>
+  </div>`;
+}
+
+// ─── Bot detail drawer ───────────────────────────────────────────
+function openDrawer(botId) {
+  const { msgCountMap, lastActivityMap, activeBotIds } = getDerived();
+  const bot = allBots.find(b => b.id === botId);
+  if (!bot) return;
+  const msgs = allConvs.filter(c => c.bot_id === botId);
+  const isActive = activeBotIds.has(bot.id);
+  const isWaitlist = bot.waitlist || bot.Waitlist;
+  const avatarClass = isWaitlist ? "avatar-waitlist" : isActive ? "avatar-active" : "avatar-inactive";
+
+  document.getElementById("drawer-avatar").className = "avatar " + avatarClass;
+  document.getElementById("drawer-avatar").style.cssText = "width:38px;height:38px;font-size:13px;";
+  document.getElementById("drawer-avatar").textContent = initials(bot.company_name);
+  document.getElementById("drawer-name").textContent = bot.company_name || "Unknown";
+  document.getElementById("drawer-keyword").textContent = bot.trigger_keyword || "";
+
+  const promptPreview = (bot.system_prompt || "No system prompt stored").substring(0, 500);
+
+  document.getElementById("drawer-body").innerHTML = `
+    <div class="drawer-section">
+      <div class="drawer-section-title">Details</div>
+      <div class="kv-row"><span class="kv-key">Status</span><span class="kv-val">
+        ${isWaitlist ? '<span class="pill pill-blue">Waitlist</span>' : isActive ? '<span class="pill pill-teal">Active</span>' : '<span class="pill pill-gray">Prospected</span>'}
+      </span></div>
+      <div class="kv-row"><span class="kv-key">Phone</span><span class="kv-val">${fmtPhone(bot.contact_phone)}</span></div>
+      <div class="kv-row"><span class="kv-key">Email</span><span class="kv-val">${bot.contact_email||"—"}</span></div>
+      <div class="kv-row"><span class="kv-key">Website</span><span class="kv-val">${bot.website_url ? `<a href="${bot.website_url}" target="_blank" style="color:var(--blue);text-decoration:none;">${bot.website_url.replace(/https?:\/\//,"").substring(0,40)}</a>` : "—"}</span></div>
+      <div class="kv-row"><span class="kv-key">Created</span><span class="kv-val">${fmtDate(bot.created_at)}</span></div>
+      <div class="kv-row"><span class="kv-key">Last activity</span><span class="kv-val">${lastActivityMap[bot.id] ? timeAgo(lastActivityMap[bot.id]) : "No activity"}</span></div>
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">Conversation</div>
+      ${msgs.length === 0
+        ? '<div style="color:var(--text3);font-size:12px;">No messages yet</div>'
+        : msgs.map(m => `
+          <div class="msg-wrap ${m.role}" style="margin-bottom:6px;">
+            <div class="msg-bubble ${m.role}">${escapeHtml(m.message_text||"")}</div>
+            <div class="msg-time${m.role==="assistant"?" right":""}">${new Date(m.created_at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div>
+          </div>`).join("")
+      }
+    </div>
+    <div class="drawer-section">
+      <div class="drawer-section-title">System prompt preview</div>
+      <div class="prompt-preview">${escapeHtml(promptPreview)}${(bot.system_prompt||"").length>500?"…":""}</div>
+    </div>`;
+
+  document.getElementById("drawer").style.display = "flex";
+}
+
+function closeDrawer(e) { if (e.target === document.getElementById("drawer")) closeDrawerDirect(); }
+function closeDrawerDirect() { document.getElementById("drawer").style.display = "none"; }
+
+// ─── Charts ──────────────────────────────────────────────────────
+function afterRender(v) {
+  if (v === "overview") {
+    renderOverviewCharts();
+    renderRecentActivity();
+  }
+  if (v === "bots") {
+    renderBotList();
+  }
+}
+
+function renderOverviewCharts() {
+  const now = new Date();
+  const days7 = Array.from({length:7}, (_,i) => {
+    const d = new Date(now); d.setDate(d.getDate() - (6-i)); return d.toISOString().split("T")[0];
+  });
+  const msgByDay = {};
+  days7.forEach(d => msgByDay[d] = 0);
+  allConvs.forEach(c => { const d = c.created_at.split("T")[0]; if (msgByDay[d] !== undefined) msgByDay[d]++; });
+
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  const gridColor = isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)";
+  const tickColor = isDark ? "#666" : "#999";
+
+  const c1 = document.getElementById("chart-msgs7");
+  if (c1) {
+    chartInstances["msgs7"] = new Chart(c1, {
+      type: "bar",
+      data: {
+        labels: days7.map(d => new Date(d).toLocaleDateString([],{weekday:"short"})),
+        datasets: [{ label: "Messages", data: Object.values(msgByDay), backgroundColor: "rgba(127,119,221,0.55)", borderColor: "#7F77DD", borderWidth: 1.5, borderRadius: 4 }]
+      },
+      options: { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}},
+        scales: { x:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:11}}}, y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:11},stepSize:1},beginAtZero:true} } }
+    });
+  }
+
+  // Cumulative bots reached (had conversations)
+  const botIds = new Set(allConvs.map(c => c.bot_id));
+  const activeBots = allBots.filter(b => botIds.has(b.id)).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+  if (activeBots.length > 0) {
+    const start = new Date(activeBots[0].created_at);
+    const end = new Date();
+    const allDays = [];
+    const dd = new Date(start); dd.setHours(0,0,0,0);
+    while (dd <= end) { allDays.push(dd.toISOString().split("T")[0]); dd.setDate(dd.getDate()+1); }
+    const counts2 = {}; allDays.forEach(d=>counts2[d]=0);
+    activeBots.forEach(b => { const d=b.created_at.split("T")[0]; if(counts2[d]!==undefined) counts2[d]++; });
+    let cum=0; const cumData = allDays.map(d=>{cum+=counts2[d];return cum;});
+    const c2 = document.getElementById("chart-cumulative");
+    if (c2) {
+      chartInstances["cumulative"] = new Chart(c2, {
+        type:"line",
+        data:{ labels: allDays.map(d=>new Date(d).toLocaleDateString([],{month:"short",day:"numeric"})), datasets:[{label:"Bots",data:cumData,borderColor:"#1D9E75",backgroundColor:"rgba(29,158,117,0.1)",borderWidth:1.5,pointRadius:0,fill:true,tension:0.3}] },
+        options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{display:false}, y:{grid:{color:gridColor},ticks:{color:tickColor,font:{size:10},stepSize:1},beginAtZero:true} } }
+      });
+    }
+  }
+}
+
+function renderRecentActivity() {
+  const el = document.getElementById("recent-activity-list");
+  if (!el) return;
+  const botMap = {};
+  allBots.forEach(b => botMap[b.id] = b);
+  const recent = [...allConvs].reverse().slice(0, 8);
+  if (recent.length === 0) { el.innerHTML = '<div class="empty">No messages yet</div>'; return; }
+  el.innerHTML = recent.map(m => {
+    const bot = botMap[m.bot_id];
+    return `<div class="msg-feed-item" style="padding:7px 0;" onclick="openDrawer(${m.bot_id})" style="cursor:pointer;">
+      <div class="msg-feed-avatar ${m.role==="user"?"pill-teal":"pill-purple"}" style="cursor:pointer;">${m.role==="user"?"U":"AI"}</div>
+      <div class="msg-feed-body">
+        <div class="msg-feed-meta">
+          <span class="msg-feed-company">${bot?.company_name||"Unknown"}</span>
+          <span class="msg-feed-time">${timeAgo(m.created_at)}</span>
+        </div>
+        <div class="msg-feed-text">${escapeHtml((m.message_text||"").substring(0,120))}${(m.message_text||"").length>120?"…":""}</div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+// ─── Export ──────────────────────────────────────────────────────
+function exportCSV() {
+  const { msgCountMap, lastActivityMap, activeBotIds } = getDerived();
+  const rows = [["id","company_name","trigger_keyword","website_url","contact_phone","contact_email","status","messages","last_activity","created_at"]];
+  allBots.forEach(b => {
+    const status = (b.waitlist||b.Waitlist) ? "waitlist" : activeBotIds.has(b.id) ? "active" : "prospected";
+    rows.push([b.id, b.company_name||"", b.trigger_keyword||"", b.website_url||"", fmtPhone(b.contact_phone), b.contact_email||"", status, msgCountMap[b.id]||0, lastActivityMap[b.id]||"", b.created_at]);
+  });
+  downloadCSV(rows, "auras-bots.csv");
+}
+
+function exportWaitlistCSV() {
+  const { msgCountMap } = getDerived();
+  const wl = allBots.filter(b => b.waitlist || b.Waitlist);
+  const rows = [["company_name","phone","email","keyword","messages","created_at"]];
+  wl.forEach(b => rows.push([b.company_name||"", fmtPhone(b.contact_phone), b.contact_email||"", b.trigger_keyword||"", msgCountMap[b.id]||0, b.created_at]));
+  downloadCSV(rows, "auras-waitlist.csv");
+}
+
+function downloadCSV(rows, filename) {
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const blob = new Blob([csv], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+// ─── Init ─────────────────────────────────────────────────────────
+loadData();
+setInterval(() => loadData(), 60000);
 </script>
 </body>
 </html>
