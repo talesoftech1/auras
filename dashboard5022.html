@@ -187,7 +187,7 @@ function App() {
 
   const activeBotIds = new Set(convs.map(c => c.bot_id));
   const totalActive = bots.filter(b => activeBotIds.has(b.id)).length;
-  const waitlistCount = bots.filter(b => b.waitlist === true || b.waitlist === "true" || b.waitlist === "TRUE").length;
+  const waitlistCount = bots.filter(b => !!(b.waitlist || b.Waitlist)).length;
 
   let filtered = bots.filter(b => {
     if (search && !(b.company_name || "").toLowerCase().includes(search.toLowerCase()) && !(b.trigger_keyword || "").toLowerCase().includes(search.toLowerCase())) return false;
